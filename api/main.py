@@ -15,9 +15,13 @@ app = FastAPI(title="RU Compliance Scanner", version="1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],   # на проде сузить до своего домена лендинга
-    allow_methods=["GET"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# поток покупки документов через Робокассу
+from api.pay import router as pay_router  # noqa: E402
+app.include_router(pay_router)
 
 
 @app.get("/health")

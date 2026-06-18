@@ -6,3 +6,4 @@ venv/
 *.png
 report_*.html
 generated/
+orders/

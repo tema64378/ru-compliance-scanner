@@ -132,7 +132,7 @@
     <div class="price">
       <div>Документы</div><div class="amt">990 ₽</div><div style="color:var(--muted)">разово</div>
       <ul><li>Политика обработки ПДн</li><li>Согласие для форм</li><li>Cookie-политика</li><li>Готовые PDF под ваш сайт</li></ul>
-      <a class="btn ghost" href="#top">Сначала проверить</a>
+      <a class="btn ghost" href="#" onclick="openOrder();return false">Получить документы</a>
     </div>
     <div class="price hot">
       <div>Мониторинг</div><div class="amt">490 ₽<span style="font-size:16px;color:var(--muted)">/мес</span></div><div style="color:var(--muted)">подписка</div>
@@ -165,9 +165,40 @@
     свои или разрешённые сайты.</div>
 </div></footer>
 
+<dialog id="om" style="border:0;border-radius:16px;padding:0;max-width:440px;width:92%">
+  <div style="padding:26px">
+    <h3 style="font-size:20px">Документы под ваш сайт — 990 ₽</h3>
+    <p style="color:#5b6470;font-size:14px;margin:6px 0 16px">Политика ПДн, согласие и cookie-политика. После оплаты — сразу скачивание.</p>
+    <input id="o_name" placeholder="Название / ИП (напр. ООО «Ромашка»)" class="oin">
+    <input id="o_site" placeholder="Адрес сайта" class="oin">
+    <input id="o_email" placeholder="E-mail (куда прислать)" class="oin">
+    <input id="o_inn" placeholder="ИНН (необязательно)" class="oin">
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn" type="button" onclick="createOrder()">Оплатить 990 ₽</button>
+      <button class="btn ghost" type="button" onclick="document.getElementById('om').close()">Отмена</button>
+    </div>
+  </div>
+</dialog>
+<style>.oin{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;
+  margin-bottom:10px;font-size:15px;font-family:inherit}.oin:focus{outline:0;border-color:var(--accent)}</style>
+
 <script>
-  // ⬇️ После хостинга бэкенда впиши сюда адрес API (FastAPI /scan). Пусто = демо-режим.
+  // ⬇️ После хостинга бэкенда впиши сюда адрес API (FastAPI). Пусто = демо-режим.
   const API_BASE = "";
+  const $ = id => document.getElementById(id);
+  function openOrder(){ $("om").showModal(); }
+  async function createOrder(){
+    const payload = {name:$("o_name").value.trim(), site:$("o_site").value.trim(),
+      email:$("o_email").value.trim(), inn:$("o_inn").value.trim(), product:"docs"};
+    if(!payload.email){ alert("Укажите e-mail"); return; }
+    if(!API_BASE){ alert("Демо-режим: подключите бэкенд (API_BASE) и Робокассу."); return; }
+    try{
+      const res = await fetch(`${API_BASE}/order`,{method:"POST",
+        headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+      const o = await res.json();
+      window.location = o.payment_url;   // редирект на оплату Робокассы
+    }catch(e){ alert("Сервис временно недоступен"); }
+  }
 
   const fmt = n => n.toLocaleString("ru-RU") + " ₽";
 
@@ -182,7 +213,7 @@
     box.innerHTML = `<div class="rcard">
       <div class="risk">${r.url} — нарушений: <b style="color:${fails.length?'var(--red)':'var(--green)'}">${fails.length}</b>${fails.length?` · риск до <b>${fmt(r.risk_max)}</b>`:""}</div>
       <div style="margin-top:14px">${rows}</div>
-      ${fails.length?`<div class="rcta"><a class="btn" href="#price">Исправить — получить документы за 990 ₽</a>
+      ${fails.length?`<div class="rcta"><a class="btn" href="#" onclick="openOrder();return false">Исправить — получить документы за 990 ₽</a>
         <span style="color:var(--muted);font-size:13px">политика + согласие + cookie</span></div>`:""}
     </div>`;
   }
