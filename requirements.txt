@@ -4,3 +4,4 @@ rich>=13.0
 fastapi>=0.110
 uvicorn[standard]>=0.27
 python-telegram-bot>=20.7
+markdown>=3.5
