@@ -15,16 +15,34 @@ def _finding(rid, status, evidence=""):
     }
 
 
-def scan(url):
+def scan(url, render=False):
     url = checks.normalize_url(url)
     try:
         resp = checks.fetch(url)
     except Exception as e:
         return {"url": url, "ok": False, "error": str(e)}
 
-    a = checks.analyze(resp.text, resp.url)
+    # render=True → берём итоговый DOM из headless Chrome (видим JS-контент)
+    html = None
+    rendered = False
+    if render:
+        html = checks.fetch_rendered(resp.url)
+        rendered = html is not None
+    if html is None:
+        html = resp.text
+
+    a = checks.analyze(html, resp.url)
+    trackers = checks.detect_trackers(html)
+    set_cookies = list(resp.cookies.keys())
     pd = a["has_pd_form"]
     findings = []
+
+    # если ссылку на политику не нашли на странице — пробуем типовые пути
+    if not a["policy_link"]:
+        probed = checks.probe_policy_paths(resp.url)
+        if probed:
+            a["policy_link"] = probed
+            a["policy_url"] = probed
 
     # policy — умная проверка: заходим по ссылке и смотрим содержимое
     if a["policy_link"]:
@@ -50,13 +68,22 @@ def scan(url):
     else:
         findings.append(_finding("consent", "fail", "форма есть, явного согласия не видно"))
 
-    # cookie
+    # cookie — теперь по факту: трекеры/аналитика и реально выставленные cookie
+    sets_data = bool(trackers or set_cookies)
     if a["cookie_banner"]:
         findings.append(_finding("cookie", "ok", "похоже на cookie-баннер с кнопкой согласия"))
+    elif sets_data:
+        why = []
+        if trackers:
+            why.append("аналитика: " + ", ".join(trackers))
+        if set_cookies:
+            why.append(f"ставит cookie ({len(set_cookies)} шт.)")
+        findings.append(_finding("cookie", "fail",
+                                 "сайт собирает данные (" + "; ".join(why) + "), а баннера согласия нет"))
     elif a["cookie_mention"]:
         findings.append(_finding("cookie", "fail", "cookie упоминаются, но активного баннера не видно"))
     else:
-        findings.append(_finding("cookie", "fail", "cookie-баннер не обнаружен"))
+        findings.append(_finding("cookie", "na", "трекеров и cookie не обнаружено"))
 
     # https
     if a["https"]:
@@ -103,6 +130,9 @@ def scan(url):
     return {
         "url": url, "final_url": resp.url, "status": resp.status_code, "ok": True,
         "collects_pd": pd,
+        "trackers": trackers,
+        "cookies_set": set_cookies,
+        "rendered": rendered,
         "findings": findings,
         "fail_count": len(fails),
         "risk_min": risk_min, "risk_max": risk_max,

@@ -52,8 +52,8 @@ def save_pdf(result, path=None):
     return path if os.path.exists(path) else None
 
 
-def run_once(url, console, as_json=False, html=None, pdf=None):
-    result = scan(url)
+def run_once(url, console, as_json=False, html=None, pdf=None, render=False):
+    result = scan(url, render=render)
     if as_json:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:
@@ -66,11 +66,11 @@ def run_once(url, console, as_json=False, html=None, pdf=None):
     return result
 
 
-def batch(urls, console, as_json):
+def batch(urls, console, as_json, render=False):
     results = []
     for u in urls:
         console.print(f"\n[bold]══ {u} ══[/]")
-        results.append(scan(u))
+        results.append(scan(u, render=render))
         if not as_json:
             print_report(results[-1], console)
     # сводная таблица
@@ -88,7 +88,7 @@ def batch(urls, console, as_json):
         print(json.dumps(results, ensure_ascii=False, indent=2))
 
 
-def interactive(console):
+def interactive(console, render=False):
     console.print("[bold]🇷🇺 Проверка сайта на требования РФ[/] — введи адрес (Enter — выход)\n")
     while True:
         try:
@@ -100,7 +100,7 @@ def interactive(console):
             console.print("Пока!")
             return
         console.print()
-        run_once(url, console)
+        run_once(url, console, render=render)
         console.print("[dim]" + "─" * 60 + "[/]\n")
 
 
@@ -111,6 +111,8 @@ def main():
     ap.add_argument("--html", nargs="?", const="", default=None, metavar="ФАЙЛ", help="Сохранить HTML-заключение")
     ap.add_argument("--pdf", nargs="?", const="", default=None, metavar="ФАЙЛ", help="Сохранить PDF-заключение (Chrome)")
     ap.add_argument("--file", help="Файл со списком URL (по одному в строке) — batch")
+    ap.add_argument("--render", action="store_true",
+                    help="Рендерить через headless Chrome (видит JS-контент, точнее, но медленнее)")
     args = ap.parse_args()
 
     console = Console()
@@ -120,12 +122,12 @@ def main():
             urls += [ln.strip() for ln in fh if ln.strip() and not ln.startswith("#")]
 
     if len(urls) > 1:
-        batch(urls, console, args.json)
+        batch(urls, console, args.json, args.render)
     elif len(urls) == 1:
-        ok = run_once(urls[0], console, args.json, args.html, args.pdf).get("ok")
+        ok = run_once(urls[0], console, args.json, args.html, args.pdf, args.render).get("ok")
         sys.exit(0 if ok else 1)
     else:
-        interactive(console)
+        interactive(console, args.render)
 
 
 if __name__ == "__main__":

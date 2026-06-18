@@ -42,7 +42,15 @@ def print_report(result, console=None):
                            title="⚠️ Внимание", border_style="yellow"))
 
     console.print(f"[dim]Сбор персональных данных на странице: "
-                  f"{'обнаружен (есть формы)' if result['collects_pd'] else 'не обнаружен'}[/]\n")
+                  f"{'обнаружен (есть формы)' if result['collects_pd'] else 'не обнаружен'}[/]")
+    trackers = result.get("trackers") or []
+    if trackers:
+        console.print(f"[dim]Трекеры/аналитика: [/]{', '.join(trackers)}")
+    if result.get("cookies_set"):
+        console.print(f"[dim]Ставит cookie: {len(result['cookies_set'])} шт.[/]")
+    if result.get("rendered"):
+        console.print("[dim]Режим: рендер через Chrome (виден JS-контент)[/]")
+    console.print()
 
     order = {"fail": 0, "manual": 1, "ok": 2, "na": 3}
     for f in sorted(result["findings"], key=lambda x: order.get(x["status"], 9)):

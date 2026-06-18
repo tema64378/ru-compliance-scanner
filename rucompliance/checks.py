@@ -1,10 +1,30 @@
 """Эвристический детект признаков на странице (пассивно, по HTML)."""
 
+import os
 import re
+import subprocess
 from urllib.parse import urlparse, urljoin
 
 import requests
 from bs4 import BeautifulSoup
+
+CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+
+# Трекеры/аналитика — именно они ставят cookie и рождают обязанность согласия.
+TRACKERS = {
+    "Яндекс.Метрика": r"mc\.yandex\.ru|metrika|yacounter|ym\(",
+    "Google Analytics / GTM": r"google-analytics\.com|googletagmanager\.com|gtag\(|\bga\(",
+    "VK Пиксель / Ретаргетинг": r"vk\.com/rtrg|top-fwz1|vk\.retargeting|openapi\.js",
+    "Mail.ru / top@Mail": r"top-mail-ru|tmr\.js|trg\.mail\.ru",
+    "Facebook Pixel": r"connect\.facebook\.net|fbq\(",
+    "Roistat": r"roistat",
+    "Tilda-аналитика": r"tilda(stat|ucode)",
+}
+
+COMMON_POLICY_PATHS = [
+    "/privacy", "/privacy-policy", "/policy", "/personal-data", "/pdn",
+    "/politika", "/politika-konfidencialnosti", "/confidential", "/legal/privacy",
+]
 
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36")
@@ -114,3 +134,44 @@ def fetch_policy(policy_url):
         "has_required": bool(POLICY_REQ_RE.search(text)),
         "status": r.status_code,
     }
+
+
+def detect_trackers(html):
+    """Какие трекеры/аналитика встроены на странице (по script-сигнатурам)."""
+    found = []
+    for name, pat in TRACKERS.items():
+        if re.search(pat, html or "", re.I):
+            found.append(name)
+    return found
+
+
+def fetch_rendered(url):
+    """Рендерит страницу через headless Chrome и возвращает итоговый DOM
+    (видны JS-баннеры/формы/трекеры). -> html|None, если Chrome недоступен."""
+    if not os.path.exists(CHROME):
+        return None
+    try:
+        out = subprocess.run(
+            [CHROME, "--headless=new", "--disable-gpu", "--dump-dom",
+             "--virtual-time-budget=4000", f"--user-agent={UA}", url],
+            capture_output=True, text=True, timeout=45)
+        dom = out.stdout
+        return dom if dom and len(dom) > 200 else None
+    except Exception:
+        return None
+
+
+def probe_policy_paths(base_url):
+    """Если ссылки на политику нет — пробуем типовые пути. -> url|None."""
+    p = urlparse(normalize_url(base_url))
+    root = f"{p.scheme}://{p.hostname}" + (f":{p.port}" if p.port else "")
+    for path in COMMON_POLICY_PATHS:
+        try:
+            r = requests.get(root + path, headers={"User-Agent": UA},
+                             timeout=8, allow_redirects=True)
+            if r.status_code == 200 and POLICY_REQ_RE.search(
+                    BeautifulSoup(r.text or "", "html.parser").get_text(" ", strip=True)):
+                return r.url
+        except Exception:
+            continue
+    return None
