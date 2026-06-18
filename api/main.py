@@ -5,10 +5,19 @@
 """
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from rucompliance.scanner import scan
 
 app = FastAPI(title="RU Compliance Scanner", version="1.0")
+
+# CORS — чтобы лендинг (другой домен) мог дёргать /scan из браузера.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],   # на проде сузить до своего домена лендинга
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/health")
