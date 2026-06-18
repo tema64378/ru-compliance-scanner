@@ -26,9 +26,18 @@ def scan(url):
     pd = a["has_pd_form"]
     findings = []
 
-    # policy
+    # policy — умная проверка: заходим по ссылке и смотрим содержимое
     if a["policy_link"]:
-        findings.append(_finding("policy", "ok", f"ссылка: {a['policy_link']}"))
+        pol = checks.fetch_policy(a["policy_url"]) if a.get("policy_url") else {"reachable": True, "has_required": True}
+        if not pol.get("reachable"):
+            findings.append(_finding("policy", "fail", "ссылка на политику есть, но страница не открывается"))
+        elif not pol.get("has_required"):
+            findings.append(_finding("policy", "fail",
+                                     "политика открывается, но не видно обязательных блоков "
+                                     "(цели обработки, оператор, права субъекта)"))
+        else:
+            findings.append(_finding("policy", "ok",
+                                     f"политика открывается и содержит обязательные блоки: {a['policy_link']}"))
     else:
         findings.append(_finding("policy", "fail" if pd else "na",
                                  "ссылка на политику не найдена"))
@@ -54,6 +63,32 @@ def scan(url):
         findings.append(_finding("https", "ok", "соединение по HTTPS"))
     else:
         findings.append(_finding("https", "fail", "сайт работает по http"))
+
+    # http -> https редирект (только если собираем ПДн)
+    if pd:
+        red = checks.check_http_redirect(url)
+        if red is True:
+            findings.append(_finding("https_redirect", "ok", "http редиректит на https"))
+        elif red is False:
+            findings.append(_finding("https_redirect", "fail", "http НЕ редиректит на https"))
+        else:
+            findings.append(_finding("https_redirect", "manual", "редирект проверить не удалось"))
+    else:
+        findings.append(_finding("https_redirect", "na", "формы сбора ПДн не обнаружены"))
+
+    # возрастная маркировка (контекстно, не считаем в риск)
+    findings.append(_finding("age_mark", "ok" if a["age_mark"] else "manual",
+                             "знак возрастной маркировки найден" if a["age_mark"]
+                             else "знака нет — проставь, если сайт информационный/СМИ"))
+
+    # маркировка рекламы (контекстно)
+    if a["erid"]:
+        findings.append(_finding("ad_marking", "ok", "найден идентификатор ERID"))
+    elif a["ad_mention"]:
+        findings.append(_finding("ad_marking", "manual",
+                                 "есть упоминание рекламы без ERID — промаркируй, если это реклама"))
+    else:
+        findings.append(_finding("ad_marking", "manual", "если размещаешь интернет-рекламу — маркируй (ERID)"))
 
     # manual / informational
     findings.append(_finding("rkn_notify", "manual", "проверь сам в реестре РКН"))
