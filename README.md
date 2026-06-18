@@ -1,5 +1,11 @@
 # 🇷🇺 RU Compliance Scanner
 
+![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)
+![License: MIT](https://img.shields.io/badge/License-MIT-22c55e)
+![152-FZ](https://img.shields.io/badge/152--ФЗ-compliance-0077FF)
+![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)
+![Scope](https://img.shields.io/badge/scope-informational-7c3aed)
+
 Проверяет сайт на соответствие требованиям законодательства РФ (прежде всего
 **152-ФЗ «О персональных данных»**), показывает что не так, как это исправить и
 **какой штраф** грозит, если не починить.
@@ -8,6 +14,30 @@
 > юридическая консультация**. Суммы штрафов — по КоАП РФ (ст. 13.11, ред. с
 > 30.05.2025), приведены для юрлиц. Точную квалификацию определяет Роскомнадзор/суд.
 > Проверяй свои или разрешённые сайты.
+
+## Демо
+
+![Пример отчёта](assets/demo.svg)
+
+## Как работает
+
+```mermaid
+flowchart LR
+    A[URL] --> B[scanner.scan]
+    B --> C[checks.py — детект на странице]
+    C --> C1[Формы / сбор ПДн?]
+    C --> C2[Ссылка на политику]
+    C --> C3[Согласие в формах]
+    C --> C4[Cookie-баннер]
+    C --> C5[HTTPS]
+    C1 --> D[rules.py — закон + штраф]
+    C2 --> D
+    C3 --> D
+    C4 --> D
+    C5 --> D
+    D --> E[Суммарный риск штрафа]
+    E --> F[report.py — отчёт простым языком]
+```
 
 ## Что проверяет
 
