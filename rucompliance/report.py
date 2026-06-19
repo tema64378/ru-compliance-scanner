@@ -56,7 +56,10 @@ def print_report(result, console=None):
     for f in sorted(result["findings"], key=lambda x: order.get(x["status"], 9)):
         icon, label, style = ST[f["status"]]
         console.print(f"{icon} [bold]{f['title']}[/] [{style}]({label})[/]")
-        console.print(f"   [dim]Закон:[/] {f['law']}")
+        law_line = f"   [dim]Закон:[/] {f['law']}"
+        if f.get("law_url"):
+            law_line += f"  [blue][link={f['law_url']}]КонсультантПлюс →[/link][/blue]"
+        console.print(law_line)
         if f["evidence"]:
             console.print(f"   [dim]Что нашли:[/] {f['evidence']}")
         if f["status"] in ("fail", "manual"):

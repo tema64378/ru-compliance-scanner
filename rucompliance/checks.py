@@ -43,6 +43,11 @@ AD_RE = re.compile(r"\bреклам", re.I)
 ERID_RE = re.compile(r"\berid\b", re.I)
 # обязательные смысловые блоки политики обработки ПДн
 POLICY_REQ_RE = re.compile(r"(цел\w+\s+обработк|оператор|субъект\w*\s+персональн|права\s+субъект)", re.I)
+# признаки интернет-магазина / приёма оплаты (→ ЗоЗПП и 54-ФЗ)
+ECOMMERCE_RE = re.compile(r"(в\s+корзину|добавить\s+в\s+корзину|оформить\s+заказ|купить|"
+                          r"add\s+to\s+cart|checkout|корзина|оплатить)", re.I)
+PAYMENT_RE = re.compile(r"(robokassa|yookassa|yoomoney|cloudpayments|tinkoff|paykeeper|"
+                        r"payanyway|sberbank|оплата\s+картой|онлайн-оплат)", re.I)
 
 
 def normalize_url(url):
@@ -104,6 +109,8 @@ def analyze(html, url):
         "age_mark": bool(AGE_RE.search(text)),
         "ad_mention": bool(AD_RE.search(text)),
         "erid": bool(ERID_RE.search(text)),
+        "ecommerce": bool(ECOMMERCE_RE.search(text)),
+        "payment": bool(PAYMENT_RE.search(html or "")),
     }
 
 

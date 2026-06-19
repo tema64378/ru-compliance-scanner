@@ -56,12 +56,12 @@ RULES = {
                "Со стороны сайта это не проверить — сверься сам.",
     },
     "requisites": {
-        "title": "Реквизиты и контакты владельца",
-        "law": "ст. 8–10 Закона «О защите прав потребителей» (для продаж/услуг)",
+        "title": "Информация о продавце (реквизиты, ЗоЗПП)",
+        "law": "ч. 1 ст. 14.8 КоАП РФ; ст. 8–10 Закона «О защите прав потребителей»",
         "applies": "manual",
-        "fine_min": 0, "fine_max": 0,
-        "fine_note": "для интернет-магазинов; зависит от нарушения",
-        "fix": "Укажите наименование, ОГРН/ИНН и контакты (для коммерческих сайтов и магазинов).",
+        "fine_min": 5000, "fine_max": 10000,
+        "fine_note": "юрлица 5 000–10 000 ₽ (для магазинов/услуг — данные о продавце и товаре)",
+        "fix": "Укажите наименование, ОГРН/ИНН, адрес и контакты, режим работы — для коммерческих сайтов.",
     },
     "https_redirect": {
         "title": "Принудительный редирект http → https",
@@ -89,7 +89,34 @@ RULES = {
         "fix": "Любую интернет-рекламу маркируйте пометкой «Реклама», данными рекламодателя "
                "и идентификатором ERID через ОРД.",
     },
+    "cashbox": {
+        "title": "Онлайн-касса и чек (54-ФЗ)",
+        "law": "ст. 14.5 КоАП РФ; 54-ФЗ «О применении ККТ»",
+        "applies": "manual",
+        "fine_min": 30000, "fine_max": 30000,
+        "fine_note": "юрлица — от 3/4 до 1 суммы расчёта, но не менее 30 000 ₽ за расчёт без ККТ "
+                     "(самозанятые формируют чек в «Мой налог» — ККТ не нужна)",
+        "fix": "Если принимаешь оплату на сайте — выдавай кассовый чек (онлайн-касса/фискализация "
+               "эквайринга), либо оформи самозанятость и формируй чек в «Мой налог».",
+    },
 }
+
+# Ссылки на конкретные статьи КоАП в КонсультантПлюс
+LAW_URLS = {
+    "policy": "https://www.consultant.ru/document/cons_doc_LAW_34661/1f421640c6775ff67079ebde06a7d2f6d17b96db/",
+    "consent": "https://www.consultant.ru/document/cons_doc_LAW_34661/1f421640c6775ff67079ebde06a7d2f6d17b96db/",
+    "cookie": "https://www.consultant.ru/document/cons_doc_LAW_34661/1f421640c6775ff67079ebde06a7d2f6d17b96db/",
+    "https": "https://www.consultant.ru/document/cons_doc_LAW_34661/1f421640c6775ff67079ebde06a7d2f6d17b96db/",
+    "https_redirect": "https://www.consultant.ru/document/cons_doc_LAW_34661/1f421640c6775ff67079ebde06a7d2f6d17b96db/",
+    "rkn_notify": "https://www.consultant.ru/document/cons_doc_LAW_34661/1f421640c6775ff67079ebde06a7d2f6d17b96db/",
+    "age_mark": "https://www.consultant.ru/document/cons_doc_LAW_34661/6cf7fd56ba2f8ca36e55ef067ade386bc0d080f6/",
+    "ad_marking": "https://www.consultant.ru/document/cons_doc_LAW_34661/2d50fc1c4013ea9ab20b8b2666c1650b1dc4c982/",
+    "requisites": "https://www.consultant.ru/document/cons_doc_LAW_34661/59f86440655bf2aec393fd031c5a4bc13cfcdc17/",
+    "cashbox": "https://www.consultant.ru/document/cons_doc_LAW_34661/3824bbacc6e85f19f12895b0ee20f3bbae92f439/",
+}
+for _k, _u in LAW_URLS.items():
+    if _k in RULES:
+        RULES[_k]["law_url"] = _u
 
 DISCLAIMER = ("ℹ️ Инструмент информационный и эвристический, не юридическая консультация. "
               "Суммы — КоАП РФ (ред. с 30.05.2025), для юрлиц. Точную квалификацию даёт РКН/суд.")

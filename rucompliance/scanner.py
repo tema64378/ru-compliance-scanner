@@ -8,6 +8,7 @@ def _finding(rid, status, evidence=""):
     r = RULES[rid]
     return {
         "id": rid, "title": r["title"], "law": r["law"], "applies": r["applies"],
+        "law_url": r.get("law_url", ""),
         "status": status,                       # fail | ok | manual | na
         "evidence": evidence,
         "fix": r["fix"], "fine_min": r["fine_min"], "fine_max": r["fine_max"],
@@ -117,11 +118,26 @@ def scan(url, render=False):
     else:
         findings.append(_finding("ad_marking", "manual", "если размещаешь интернет-рекламу — маркируй (ERID)"))
 
+    # реквизиты / ЗоЗПП (для магазинов и приёма оплаты — обязательно)
+    shop = a.get("ecommerce") or a.get("payment")
+    if a["requisites"]:
+        findings.append(_finding("requisites", "ok", "ИНН/ОГРН найдены на странице"))
+    elif shop:
+        findings.append(_finding("requisites", "fail",
+                                 "похоже на магазин/приём оплаты, но реквизитов продавца не видно"))
+    else:
+        findings.append(_finding("requisites", "manual",
+                                 "реквизиты не найдены (для некоммерческих сайтов — норма)"))
+
+    # касса / 54-ФЗ (если на странице есть приём оплаты)
+    if a.get("payment"):
+        findings.append(_finding("cashbox", "manual",
+                                 "обнаружен приём оплаты — проверь, что выдаётся кассовый чек"))
+    else:
+        findings.append(_finding("cashbox", "na", "приём оплаты на странице не обнаружен"))
+
     # manual / informational
     findings.append(_finding("rkn_notify", "manual", "проверь сам в реестре РКН"))
-    findings.append(_finding("requisites", "ok" if a["requisites"] else "manual",
-                             "ИНН/ОГРН найдены на странице" if a["requisites"]
-                             else "реквизиты не найдены (норма для некоммерческих)"))
 
     fails = [f for f in findings if f["status"] == "fail"]
     risk_min = sum(f["fine_min"] for f in fails)

@@ -42,7 +42,7 @@ def to_html(result):
         cards += f"""
         <div class="card" style="border-left:4px solid {col}">
           <div class="ct">{icon} {_esc(f['title'])} <span class="b" style="background:{col}">{label}</span></div>
-          <div class="law">{_esc(f['law'])}</div>
+          <div class="law">{_esc(f['law'])}{(' · <a href="' + _esc(f['law_url']) + '" target="_blank">КонсультантПлюс →</a>') if f.get('law_url') else ''}</div>
           {ev}{fix}{fine}
         </div>"""
 
