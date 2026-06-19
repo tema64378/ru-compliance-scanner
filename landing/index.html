@@ -78,6 +78,17 @@
 
   footer{background:var(--ink);color:#aeb6c2;padding:40px 0;font-size:14px}
   footer a{color:#fff} .disc{color:#7c8694;font-size:12px;margin-top:14px;max-width:760px}
+
+  /* видео-фон hero */
+  .hero{position:relative;overflow:hidden;color:#fff}
+  .hero-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+  .hero-veil{position:absolute;inset:0;z-index:1;
+    background:linear-gradient(180deg,rgba(8,11,18,.74),rgba(8,11,18,.88))}
+  .hero .wrap{position:relative;z-index:2}
+  .hero h1{color:#fff}
+  .hero h1 span{color:#4d9fff}
+  .hero .lead{color:rgba(255,255,255,.82)}
+  .hero .trust{color:rgba(255,255,255,.72)}
 </style>
 </head>
 <body>
@@ -91,7 +102,12 @@
   </div>
 </div></nav>
 
-<header class="hero" id="top"><div class="wrap">
+<header class="hero" id="top">
+  <video class="hero-bg" autoplay muted loop playsinline preload="auto">
+    <source src="assets/hero.mp4" type="video/mp4">
+  </video>
+  <div class="hero-veil"></div>
+  <div class="wrap">
   <div class="pill">🇷🇺 Соответствие 152-ФЗ</div>
   <h1>Узнайте, на какой <span>штраф</span><br>попадает ваш сайт</h1>
   <p class="lead">Проверка сайта на требования закона «О персональных данных» за 30 секунд.
