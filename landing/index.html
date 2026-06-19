@@ -13,6 +13,8 @@
     --line:#e6e9ee; --bg:#f6f8fb; --red:#dc2626; --green:#16a34a;
   }
   *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  [id]{scroll-margin-top:74px}   /* чтобы якорь не прятался под липкую шапку */
   body{font-family:Inter,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);
     background:#fff;line-height:1.55;-webkit-font-smoothing:antialiased}
   .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
@@ -113,7 +115,7 @@
   <div class="links">
     <a href="#how">Как работает</a>
     <a href="#price">Цены</a>
-    <a class="btn" href="#top" style="padding:9px 16px;font-size:14px">Проверить</a>
+    <a class="btn" href="#top" style="padding:9px 16px;font-size:14px" onclick="setTimeout(()=>document.getElementById('url').focus(),350)">Проверить</a>
   </div>
 </div></nav>
 
