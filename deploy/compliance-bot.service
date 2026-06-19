@@ -1,0 +1,14 @@
+[Unit]
+Description=152check Telegram bot
+After=network.target
+
+[Service]
+WorkingDirectory=/var/www/152check
+EnvironmentFile=/var/www/152check/.env
+ExecStart=/var/www/152check/.venv/bin/python bot.py
+Restart=always
+RestartSec=5
+User=www-data
+
+[Install]
+WantedBy=multi-user.target

@@ -7,3 +7,4 @@ venv/
 report_*.html
 generated/
 orders/
+.env

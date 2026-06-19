@@ -2,7 +2,30 @@
 
 Три части: **API** (сканер + оплата), **бот** (отдельный сервис 24/7), **лендинг** (статика).
 
-## 1. Бэкенд (API) — Railway / VPS
+## 🚀 Рекомендуемый путь: свой домен + RU-VPS (turnkey)
+
+Всё на одной машине под твоим доменом (`152check.ru`), HTTPS, данные в РФ. Выглядит
+как настоящий сервис, без сторонних сабдоменов.
+
+1. Купи **`.ru` домен** (reg.ru, ~200 ₽/год) и **VPS Ubuntu** (Timeweb/aeza, ~200 ₽/мес).
+2. Наведи A-запись домена на IP сервера.
+3. На сервере:
+   ```bash
+   git clone https://github.com/tema64378/ru-compliance-scanner /var/www/152check
+   cd /var/www/152check
+   nano deploy/nginx.conf          # заменить ВАШ_ДОМЕН
+   nano .env                       # BOT_TOKEN, ROBOKASSA_LOGIN/PASS1/PASS2
+   sudo bash deploy/setup.sh       # поставит API + бота + nginx, всё на автозапуске
+   sudo certbot --nginx -d 152check.ru   # HTTPS
+   ```
+4. `API_BASE` в `landing/index.html` оставь пустым — API на том же домене.
+
+Готово: лендинг на `https://152check.ru`, API проксируется там же, бот крутится в фоне,
+всё перезапускается само (systemd). Конфиги — в папке `deploy/`.
+
+---
+
+## 1. Бэкенд (API) — Railway / VPS (альтернатива)
 
 **Railway (проще всего):**
 1. railway.app → New Project → Deploy from GitHub → выбрать `ru-compliance-scanner`.

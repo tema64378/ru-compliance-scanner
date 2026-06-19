@@ -184,7 +184,9 @@
 
 <script>
   // ⬇️ После хостинга бэкенда впиши сюда адрес API (FastAPI). Пусто = демо-режим.
-  const API_BASE = "";
+  // Для локального теста можно открыть лендинг с ?api=http://localhost:8000
+  const PROD_API = "";
+  const API_BASE = new URLSearchParams(location.search).get("api") || PROD_API;
   const $ = id => document.getElementById(id);
   function openOrder(){ $("om").showModal(); }
   async function createOrder(){
