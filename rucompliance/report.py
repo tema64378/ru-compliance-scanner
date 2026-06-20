@@ -50,6 +50,8 @@ def print_report(result, console=None):
         console.print(f"[dim]Ставит cookie: {len(result['cookies_set'])} шт.[/]")
     if result.get("rendered"):
         console.print("[dim]Режим: рендер через Chrome (виден JS-контент)[/]")
+    if result.get("pages_scanned", 1) > 1:
+        console.print(f"[dim]Просканировано страниц: {result['pages_scanned']}[/]")
     console.print()
 
     order = {"fail": 0, "manual": 1, "ok": 2, "na": 3}

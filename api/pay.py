@@ -115,6 +115,17 @@ async def robokassa_result(request: Request):
     if inv in db["orders"]:
         db["orders"][inv]["paid"] = True
         _save(db)
+        # отправляем документы на e-mail (если настроен SMTP)
+        o = db["orders"][inv]
+        if o.get("email"):
+            from payments.email_send import send_email, configured
+            if configured():
+                files = ([os.path.join(ORDERS_DIR, inv, k + ".md") for k in TITLES]
+                         + [os.path.join(ORDERS_DIR, inv, k + ".html") for k in TITLES])
+                send_email(o["email"], "Ваши документы 152-ФЗ — 152чек",
+                           "Спасибо за оплату! Во вложении документы под ваш сайт "
+                           "(политика, согласие, cookie-политика). Проверьте и адаптируйте под себя.",
+                           files)
     return PlainTextResponse(f"OK{inv}")
 
 

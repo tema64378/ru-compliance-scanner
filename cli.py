@@ -66,13 +66,26 @@ def run_once(url, console, as_json=False, html=None, pdf=None, render=False):
     return result
 
 
-def batch(urls, console, as_json, render=False):
+def batch(urls, console, as_json, render=False, csv_path=None):
     results = []
     for u in urls:
         console.print(f"\n[bold]══ {u} ══[/]")
         results.append(scan(u, render=render))
         if not as_json:
             print_report(results[-1], console)
+    # лид-ген экспорт в CSV
+    if csv_path:
+        import csv as _csv
+        with open(csv_path, "w", newline="", encoding="utf-8-sig") as fh:
+            w = _csv.writer(fh, delimiter=";")
+            w.writerow(["Сайт", "Нарушений", "Риск штрафа (макс), ₽", "Что не так"])
+            for r in results:
+                if r.get("ok"):
+                    fails = [f["title"] for f in r["findings"] if f["status"] == "fail"]
+                    w.writerow([r["url"], r["fail_count"], r["risk_max"], "; ".join(fails)])
+                else:
+                    w.writerow([r.get("url", "?"), "ошибка", "", r.get("error", "")])
+        console.print(f"\n[green]📄 CSV сохранён:[/] {csv_path}")
     # сводная таблица
     if not as_json:
         t = Table(title="Сводка по сайтам")
@@ -113,6 +126,7 @@ def main():
     ap.add_argument("--file", help="Файл со списком URL (по одному в строке) — batch")
     ap.add_argument("--render", action="store_true",
                     help="Рендерить через headless Chrome (видит JS-контент, точнее, но медленнее)")
+    ap.add_argument("--csv", help="Сохранить сводку batch в CSV (для лид-гена)")
     args = ap.parse_args()
 
     console = Console()
@@ -121,8 +135,8 @@ def main():
         with open(args.file, encoding="utf-8") as fh:
             urls += [ln.strip() for ln in fh if ln.strip() and not ln.startswith("#")]
 
-    if len(urls) > 1:
-        batch(urls, console, args.json, args.render)
+    if len(urls) > 1 or (args.csv and urls):
+        batch(urls, console, args.json, args.render, args.csv)
     elif len(urls) == 1:
         ok = run_once(urls[0], console, args.json, args.html, args.pdf, args.render).get("ok")
         sys.exit(0 if ok else 1)

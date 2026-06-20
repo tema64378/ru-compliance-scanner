@@ -16,7 +16,7 @@ def _finding(rid, status, evidence=""):
     }
 
 
-def scan(url, render=False):
+def scan(url, render=False, crawl=True):
     url = checks.normalize_url(url)
     try:
         resp = checks.fetch(url)
@@ -35,6 +35,23 @@ def scan(url, render=False):
     a = checks.analyze(html, resp.url)
     trackers = checks.detect_trackers(html)
     set_cookies = list(resp.cookies.keys())
+
+    # многостраничный обход — объединяем сигналы с ключевых страниц
+    pages_scanned = 1
+    if crawl:
+        for ph in checks.crawl(checks.internal_links(html, resp.url, limit=4)):
+            ex = checks.analyze(ph, resp.url)
+            for k in ("has_pd_form", "consent", "cookie_mention", "cookie_banner",
+                      "requisites", "age_mark", "ad_mention", "erid", "ecommerce", "payment"):
+                a[k] = a[k] or ex.get(k)
+            if not a.get("policy_link") and ex.get("policy_link"):
+                a["policy_link"] = ex["policy_link"]
+                a["policy_url"] = ex.get("policy_url")
+            for t in checks.detect_trackers(ph):
+                if t not in trackers:
+                    trackers.append(t)
+            pages_scanned += 1
+
     pd = a["has_pd_form"]
     findings = []
 
@@ -149,6 +166,7 @@ def scan(url, render=False):
         "trackers": trackers,
         "cookies_set": set_cookies,
         "rendered": rendered,
+        "pages_scanned": pages_scanned,
         "findings": findings,
         "fail_count": len(fails),
         "risk_min": risk_min, "risk_max": risk_max,

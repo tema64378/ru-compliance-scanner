@@ -107,6 +107,12 @@ def main():
         console.print(f"  • {titles[key]}: {key}.md, .html"
                       + (", .pdf" if pdf else " (PDF: нет Chrome)"))
 
+    # готовый cookie-баннер (закрывает самое частое нарушение)
+    from rucompliance.cookiegen import cookie_banner
+    with open(os.path.join(outdir, "cookie_banner.html"), "w", encoding="utf-8") as f:
+        f.write(cookie_banner(policy_url=(op.site.rstrip("/") + "/privacy") if op.site else "/privacy"))
+    console.print("  • Cookie-баннер (готовый код): cookie_banner.html")
+
     console.print("\n[dim]⚠️ Шаблоны — проверьте и адаптируйте под себя. Это не юр.консультация.[/]")
 
 

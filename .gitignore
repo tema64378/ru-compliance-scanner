@@ -8,3 +8,4 @@ report_*.html
 generated/
 orders/
 .env
+monitors.json

@@ -168,6 +168,45 @@ def fetch_rendered(url):
         return None
 
 
+KEY_LINK_RE = re.compile(r"(контакт|оплат|достав|возврат|политик|конфиденц|корзин|каталог|"
+                         r"услуг|тариф|о\s+компан|о\s+нас|cart|checkout|about|contact|privacy)", re.I)
+
+
+def internal_links(html, base, limit=4):
+    """Полезные внутренние ссылки (контакты, оплата, политика, корзина и т.п.)."""
+    soup = BeautifulSoup(html or "", "html.parser")
+    host = (urlparse(base).hostname or "").replace("www.", "")
+    seen, cand = set(), []
+    for a in soup.find_all("a"):
+        href = a.get("href") or ""
+        if not href or href.startswith(("#", "mailto:", "tel:", "javascript")):
+            continue
+        u = urljoin(base, href)
+        p = urlparse(u)
+        if not p.hostname or p.hostname.replace("www.", "") != host:
+            continue
+        if u in seen:
+            continue
+        seen.add(u)
+        score = 1 if KEY_LINK_RE.search((a.get_text(" ", strip=True) or "") + " " + href) else 0
+        cand.append((score, u))
+    cand.sort(key=lambda x: -x[0])
+    return [u for _, u in cand[:limit]]
+
+
+def crawl(urls):
+    """Скачивает несколько страниц, возвращает список html (молча пропускает ошибки)."""
+    out = []
+    for u in urls:
+        try:
+            r = requests.get(u, headers={"User-Agent": UA}, timeout=8, allow_redirects=True)
+            if r.status_code == 200:
+                out.append(r.text)
+        except Exception:
+            continue
+    return out
+
+
 def probe_policy_paths(base_url):
     """Если ссылки на политику нет — пробуем типовые пути. -> url|None."""
     p = urlparse(normalize_url(base_url))

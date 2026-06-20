@@ -161,6 +161,27 @@
   </div>
 </div></section>
 
+<section><div class="wrap" style="max-width:720px">
+  <div class="sec-t">Калькулятор штрафа</div>
+  <p class="sec-s">Отметь, чего не хватает на сайте — покажем максимальный риск для юрлица.</p>
+  <div id="calc" style="margin-top:28px;display:grid;gap:10px">
+    <label class="ci"><input type="checkbox" data-f="300000" onchange="calc()"> Нет cookie-согласия (есть аналитика) <span>до 300 000 ₽</span></label>
+    <label class="ci"><input type="checkbox" data-f="500000" onchange="calc()"> Сбор данных в формах без согласия <span>до 500 000 ₽</span></label>
+    <label class="ci"><input type="checkbox" data-f="60000" onchange="calc()"> Нет политики обработки ПДн <span>до 60 000 ₽</span></label>
+    <label class="ci"><input type="checkbox" data-f="300000" onchange="calc()"> Нет HTTPS на страницах с формами <span>до 300 000 ₽</span></label>
+    <label class="ci"><input type="checkbox" data-f="500000" onchange="calc()"> Реклама без маркировки (ERID) <span>до 500 000 ₽</span></label>
+    <label class="ci"><input type="checkbox" data-f="3000000" onchange="calc()"> Не уведомлены об утечке ПДн <span>до 3 000 000 ₽</span></label>
+  </div>
+  <div style="margin-top:22px;text-align:center;font-size:18px">
+    Максимальный риск: <b id="calc-sum" style="color:var(--red);font-size:26px">0 ₽</b>
+  </div>
+  <div style="text-align:center;margin-top:18px"><a class="btn" href="#" onclick="openOrder();return false">Закрыть нарушения — документы за 990 ₽</a></div>
+  <style>.ci{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);
+    border-radius:12px;padding:14px 16px;font-size:15px;cursor:pointer}
+    .ci span{margin-left:auto;color:var(--red);font-weight:600;white-space:nowrap}
+    .ci input{width:18px;height:18px;cursor:pointer}</style>
+</div></section>
+
 <section class="alt" id="price"><div class="wrap">
   <div class="sec-t">Цены</div>
   <p class="sec-s">Проверка — бесплатно. Платите только за исправление.</p>
@@ -239,6 +260,11 @@
   const API_BASE = new URLSearchParams(location.search).get("api") || PROD_API;
   const $ = id => document.getElementById(id);
   function openOrder(){ $("om").showModal(); }
+  function calc(){
+    var sum=0;
+    document.querySelectorAll('#calc input:checked').forEach(function(i){ sum += +i.dataset.f; });
+    document.getElementById('calc-sum').textContent = sum.toLocaleString('ru-RU') + ' ₽';
+  }
   async function createOrder(){
     const payload = {name:$("o_name").value.trim(), site:$("o_site").value.trim(),
       email:$("o_email").value.trim(), inn:$("o_inn").value.trim(), product:"docs"};

@@ -58,6 +58,8 @@ def to_html(result):
   *{{box-sizing:border-box}} body{{margin:0;font-family:-apple-system,"Segoe UI",Inter,Arial,sans-serif;
     color:#16181b;background:#f6f8fb;line-height:1.55}}
   .wrap{{max-width:820px;margin:0 auto;padding:32px 20px 60px}}
+  .brand{{font-size:22px;font-weight:800;margin-bottom:16px}}
+  .brand b{{color:#0077FF}} .brand span{{font-size:13px;font-weight:500;color:#64748b;margin-left:10px}}
   .head{{background:#0e1116;color:#fff;border-radius:16px;padding:24px 26px}}
   .flag{{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#7da7ff}}
   .url{{font-size:20px;font-weight:700;margin:4px 0;word-break:break-all}}
@@ -74,6 +76,7 @@ def to_html(result):
   footer{{color:#64748b;font-size:12px;margin-top:26px}}
 </style></head>
 <body><div class="wrap">
+  <div class="brand">152<b>чек</b><span>заключение о проверке сайта на 152-ФЗ</span></div>
   <div class="head">
     <div class="flag">🇷🇺 Заключение о проверке сайта · 152-ФЗ</div>
     <div class="url">{url}</div>
