@@ -280,7 +280,7 @@
 
   const fmt = n => n.toLocaleString("ru-RU") + " ₽";
 
-  function render(r){
+  function render(r, demo){
     const box = document.getElementById("result");
     box.style.display = "block";
     if(!r.ok){ box.innerHTML = `<div class="rcard">Не удалось открыть сайт: ${r.error||""}</div>`; return; }
@@ -288,7 +288,8 @@
     const rows = fails.map(f=>`<div class="vio"><span class="x">✕</span><span>${f.title}</span>
       ${f.fine_max?`<span class="fine">до ${fmt(f.fine_max)}</span>`:""}</div>`).join("") ||
       `<div class="vio">Явных нарушений не нашли 🎉</div>`;
-    box.innerHTML = `<div class="rcard">
+    const note = demo ? `<div style="background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px">⚠️ Демо-пример (бэкенд не подключён). Реальная проверка вашего сайта — в запущенном сервисе.</div>` : "";
+    box.innerHTML = `<div class="rcard">${note}
       <div class="risk">${r.url} — нарушений: <b style="color:${fails.length?'var(--red)':'var(--green)'}">${fails.length}</b>${fails.length?` · риск до <b>${fmt(r.risk_max)}</b>`:""}</div>
       <div style="margin-top:14px">${rows}</div>
       ${fails.length?`<div class="rcta"><a class="btn" href="#" onclick="openOrder();return false">Исправить — получить документы за 990 ₽</a>
@@ -303,12 +304,17 @@
     {status:"fail",title:"Согласие в форме без отдельного чекбокса",fine_max:500000}
   ]};
 
+  function validUrl(s){ return /^(https?:\/\/)?([a-zа-яё0-9-]+\.)+[a-zа-яё]{2,}(\/.*)?$/i.test(s); }
   async function check(){
     const url = document.getElementById("url").value.trim();
-    if(!url) return;
     const box = document.getElementById("result");
+    if(!validUrl(url)){
+      box.style.display="block";
+      box.innerHTML = `<div class="rcard">Введите адрес сайта целиком, например <b>example.ru</b></div>`;
+      return;
+    }
     box.style.display="block"; box.innerHTML = `<div class="rcard loading">Проверяем ${url}…</div>`;
-    if(!API_BASE){ setTimeout(()=>render({...DEMO,url}),700); return; }
+    if(!API_BASE){ setTimeout(()=>render({...DEMO,url},true),700); return; }
     try{
       const res = await fetch(`${API_BASE}/scan?url=`+encodeURIComponent(url));
       render(await res.json());
