@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>152чек — Shorts-карточки</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#06080d;overflow:hidden;font-family:Inter,system-ui,Arial,sans-serif}
+  /* сцена 9:16 по центру — записывай этот прямоугольник (или весь экран в портрете) */
+  .stage{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:min(100vw, 56.25vh); height:min(177.78vw, 100vh);
+    background:radial-gradient(120% 90% at 50% 10%, #0d1830 0%, #06080d 60%);
+    color:#fff; overflow:hidden; display:flex; align-items:center; justify-content:center; text-align:center;
+    container-type:inline-size}
+  .scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:8% 7%; opacity:0}
+  .scene.on{opacity:1}
+  .eyebrow{font-size:4.4cqw;font-weight:700;color:#7da7ff;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2.5vh;
+    transform:translateY(20px);transition:.5s}
+  .big{font-size:10cqw;font-weight:900;line-height:1.05;letter-spacing:-.02em;transform:scale(.85);transition:.5s cubic-bezier(.2,1,.3,1)}
+  .sum{font-size:13cqw;font-weight:900;color:#ff4d4d;margin-top:1vh;transform:scale(.7);transition:.55s cubic-bezier(.2,1.4,.3,1)}
+  .sub{font-size:4.4cqw;font-weight:600;color:#aeb6c2;margin-top:3vh;max-width:84%;transform:translateY(20px);transition:.5s}
+  .scene.on .eyebrow,.scene.on .sub{transform:translateY(0)}
+  .scene.on .big{transform:scale(1)} .scene.on .sum{transform:scale(1)}
+  .mascot{width:46%;margin-bottom:3vh;filter:drop-shadow(0 14px 30px rgba(0,0,0,.5));transform:translateY(30px) scale(.9);transition:.6s}
+  .scene.on .mascot{transform:translateY(0) scale(1)}
+  .logo{font-size:11cqw;font-weight:900} .logo b{color:#2d8cff}
+  .pill{display:inline-block;background:#0a1830;border:1px solid #21407a;color:#7da7ff;font-size:4cqw;font-weight:700;
+    padding:1.4vh 3vh;border-radius:99px;margin-top:3vh}
+  .hint{position:absolute;bottom:2vh;left:0;right:0;text-align:center;color:#3a4660;font-size:1.8vh}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="scene"><div class="eyebrow">РКН · 2025</div><div class="big">Штрафы за<br>персональные данные</div><div class="sub">выросли в разы с 30 мая 2025</div></div>
+  <div class="scene"><div class="eyebrow">Нет политики ПДн</div><div class="sum">до 60 000 ₽</div></div>
+  <div class="scene"><div class="eyebrow">Форма без согласия</div><div class="sum">до 500 000 ₽</div></div>
+  <div class="scene"><div class="eyebrow">Метрика без cookie-баннера</div><div class="sum">до 300 000 ₽</div></div>
+  <div class="scene"><div class="big">И это даже если<br>у тебя просто<br>визитка 🤡</div></div>
+  <div class="scene">
+    <img class="mascot" src="../landing/assets/mascot.png" alt="">
+    <div class="logo">152<b>чек</b></div>
+    <div class="sub">проверит сайт за 30 секунд<br>и даст готовые документы</div>
+    <div class="pill">Проверь свой сайт 👆 ссылка в шапке</div>
+  </div>
+</div>
+<div class="hint">Открой на весь экран (F11) и запиши экран. Сцены идут по кругу.</div>
+<script>
+  const scenes=[...document.querySelectorAll('.scene')];
+  const dur=[2600,2400,2400,2400,2600,3600]; // мс на сцену
+  let i=0;
+  function show(){
+    scenes.forEach(s=>s.classList.remove('on'));
+    scenes[i].classList.add('on');
+    setTimeout(()=>{ i=(i+1)%scenes.length; show(); }, dur[i]);
+  }
+  show();
+</script>
+</body>
+</html>
